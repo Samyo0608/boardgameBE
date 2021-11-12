@@ -23,22 +23,19 @@ app.use(express.urlencoded({ extended: true }));
 // 使用這個中間件，才可以解析得到 json 的資料
 app.use(express.json());
 
-app.get("/api/test", (req, res) => {
-  res.json({
-    name: "ashley",
-    job: "engineer",
-  });
-});
-
 //--------------express-session---------------
-// session 儲存在瀏覽器
-const expressSessin = require("express-session");
+const expressSession = require("express-session");
+let FileStore = require("session-file-store")(expressSession);
+//--------------session-file-store------------
+//--------建立資料夾後session會存在裡面---------
 app.use(
-  expressSessin({
+  expressSession({
+    //儲存路徑
+    store: new FileStore({ path: path.join(__dirname, ".", "sessions") }),
     secret: "boardgameSession",
     name: "userSession",
     saveUninitialized: false,
-    resave: true,
+    resave: false,
   })
 );
 
@@ -65,6 +62,5 @@ app.use((err, req, res, next) => {
 
 // --------------聆聽(port:3001)----------------
 app.listen(3001, () => {
-  console.log("express app 啟動，資料正常讀取");
   console.log("測試成功");
 });

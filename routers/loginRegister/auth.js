@@ -24,7 +24,7 @@ const registerRules = [
   body("rePassword")
     .custom((value, { req }) => {
       // 輸入值和錯誤資訊內的密碼不一致
-      return value !== req.body.password;
+      return value === req.body.password;
     })
     .withMessage("密碼不一致"),
 ];
@@ -34,7 +34,7 @@ const registerRules = [
 // 敏感資料method用post
 router.post("/register", registerRules, async (req, res) => {
   // 確認資料用
-  console.log("req.body", req.body);
+  //   console.log("req.body", req.body);
 
   //定義 error = 錯誤資訊要求
   const error = validationResult(req);
@@ -43,16 +43,15 @@ router.post("/register", registerRules, async (req, res) => {
     // 定義Fetch status 和自定義 code
     return res.status(101).json({ code: 101, message: error.array() });
   }
-  // 開始註冊
   try {
+    // 開始註冊
     // 驗證是否重複註冊
     let member = await connection.queryAsync(
       "SELECT * FROM member WHERE email = ?",
       req.body.email
     );
-    res.json(member);
 
-    if (mamber.length > 0) {
+    if (member.length > 0) {
       return res.json({
         code: "102",
         message: "此email已使用過",
@@ -65,18 +64,18 @@ router.post("/register", registerRules, async (req, res) => {
     let newPassword = await bcrypt.hash(req.body.password, 10);
 
     // 上傳至資料庫
-    // let memberData = await connection.queryAsync(
-    //   "INSERT INTO member (email, password) VALUES (?,?)",
-    //   [req.body.email, newPassword]
-    // );
-    connection.query(
-      "INSERT INTO (email, password) VALUES (? ,?))",
-      [req.body.email, newPassword],
-      function (err, rows) {
-        if (err) throw err;
-        console.log("Response: ", rows);
-      }
+    let memberData = await connection.queryAsync(
+      "INSERT INTO member (email, password, point) VALUES (?,?,?)",
+      [req.body.email, newPassword, 50]
     );
+    // connection.query(
+    //   "INSERT INTO (email, password) VALUES (? ,?)",
+    //   [req.body.email, newPassword],
+    //   function (err, rows) {
+    //     if (err) throw err;
+    //     console.log("Response: ", rows);
+    //   }
+    // );
     // return memberData;
     // connection.query(
     //   "INSERT INTO member (email, password) VALUES (?,?)",
@@ -106,8 +105,10 @@ router.post("/login", async (req, res) => {
     res.json({ code: "104", message: "帳號或密碼錯誤" });
   }
 
+  member = member[0];
+
   //compare(輸入的密碼, 資料庫儲存的密碼)
-  let memberData = await bcrypt.compare(req.body.password, member[0].password);
+  let memberData = await bcrypt.compare(req.body.password, member.password);
 
   if (memberData === false) {
     res.json({ code: "104", message: "帳號或密碼錯誤" });
@@ -116,11 +117,11 @@ router.post("/login", async (req, res) => {
     // 1. 建立session資料(id、account、email)
     // 2. 跳轉頁面
     let memberSession = {
-      id: member[0].id,
-      email: member[0].email,
-      account: member[0].account,
+      id: member.id,
+      email: member.email,
+      account: member.account,
     };
-    req.session.member[0] = memberSession;
+    req.session.member = memberSession;
 
     //回應出來的值
     res.json({
