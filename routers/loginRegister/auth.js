@@ -65,8 +65,8 @@ router.post("/register", registerRules, async (req, res) => {
 
     // 上傳至資料庫
     let memberData = await connection.queryAsync(
-      "INSERT INTO member (email, password, point) VALUES (?,?,?)",
-      [req.body.email, newPassword, 50]
+      "INSERT INTO member (email, password, point,account) VALUES (?,?,?,?)",
+      [req.body.email, newPassword, 50, req.body.account]
     );
     // connection.query(
     //   "INSERT INTO (email, password) VALUES (? ,?)",
@@ -91,7 +91,6 @@ router.post("/register", registerRules, async (req, res) => {
 
 router.post("/login", async (req, res) => {
   // 確認資料用
-  console.log(req.body);
   let member = await connection.queryAsync(
     "SELECT * FROM member WHERE email = ?",
     req.body.email
