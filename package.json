@@ -21,6 +21,7 @@
     "express-validator": "^6.13.0",
     "moment": "^2.29.1",
     "multer": "^1.4.3",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "session-file-store": "^1.5.0"
   }
 }
