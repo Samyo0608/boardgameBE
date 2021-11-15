@@ -114,12 +114,13 @@ router.post("/login", async (req, res) => {
     res.json({ code: "104", message: "帳號或密碼錯誤" });
   } else {
     // if 成功的話
-    // 1. 建立session資料(id、account、email)
+    // 1. 建立session資料(id、account、email、point)
     // 2. 跳轉頁面
     let memberSession = {
       id: member.id,
       email: member.email,
       account: member.account,
+      point: member.point,
     };
     req.session.member = memberSession;
 
@@ -135,7 +136,7 @@ router.post("/login", async (req, res) => {
 
 //只要登出，所以從網址get就可以
 router.get("/logout", (req, res) => {
-  req.session.member[0] = null;
+  req.session.member = null;
 
   res.json({ message: "登出成功" });
 });

@@ -47,6 +47,10 @@ app.use(
 let authRouter = require("./routers/loginRegister/auth.js");
 app.use("/api/auth", authRouter);
 
+let sessionRouter = require("./routers/loginRegister/session.js");
+app.use("/api/session", sessionRouter);
+
+
 app.use((req, res, next) => {
   console.log(`${req.url} 找不到路由`);
   next();
