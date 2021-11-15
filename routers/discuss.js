@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require("multer");
 var upload = multer();
 const moment = require("moment");
+const connection = require("../connection/db.js");
 
 // 列表：全部資料
 router.get("/", async (req, res) => {
