@@ -50,18 +50,17 @@ app.use("/api/auth", authRouter);
 let sessionRouter = require("./routers/loginRegister/session.js");
 app.use("/api/session", sessionRouter);
 
+let memberRouter = require("./routers/memberCenter/memSelf.js");
+app.use("/api/member", memberRouter);
+
 // 引用 /api/discuss 的相關路由
 let discussRouter = require("./routers/discuss");
 app.use("/api/discuss", discussRouter);
-
 
 // // 活動頁面路由
 
 let conRouter = require("./routers/contest/contestPage.js");
 app.use("/api/contest", conRouter);
-
-
-
 
 app.use((req, res, next) => {
   console.log(`${req.url} 找不到路由`);
