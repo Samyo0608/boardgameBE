@@ -61,6 +61,10 @@ app.use("/api/discuss", discussRouter);
 let conRouter = require("./routers/contest/contestPage.js");
 app.use("/api/contest", conRouter);
 
+// 租賃頁面路由
+let bookingRouter = require("./routers/booking/bookingBE.js");
+app.use("/api/booking", bookingRouter);
+
 app.use((req, res, next) => {
   console.log(`${req.url} 找不到路由`);
   next();
