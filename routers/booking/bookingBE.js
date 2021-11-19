@@ -1,5 +1,5 @@
 const express = require("express");
-const path = require("path");
+const { now } = require("moment");
 const router = express.Router();
 const moment = require("moment");
 
@@ -12,6 +12,22 @@ router.post("/", async (req, res) => {
   res.json(data);
 });
 
-// 上傳至資料庫
+router.post("/order", async (req, res) => {
+  console.log("req.body", req.body);
+  let result = await connection.queryAsync(
+    "INSERT INTO booking (room,name,phone,email,date,time) VALUES (?)",
+    [
+      [
+        req.body.room,
+        req.body.name,
+        req.body.phone,
+        req.body.email,
+        req.body.date,
+        req.body.time,
+      ],
+    ]
+  );
+  res.send(req.body);
+});
 
 module.exports = router;
