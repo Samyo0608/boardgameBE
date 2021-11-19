@@ -27,6 +27,11 @@ const registerRules = [
       return value === req.body.password;
     })
     .withMessage("密碼不一致"),
+  body("account")
+    .isLength({ min: 6 })
+    .withMessage("帳號不得低於6碼")
+    .isLength({ max: 20 })
+    .withMessage("帳號不得超過20碼"),
 ];
 
 //----------------註冊router---------------
@@ -55,6 +60,18 @@ router.post("/register", registerRules, async (req, res) => {
       return res.json({
         code: "102",
         message: "此email已使用過",
+      });
+    }
+
+    let memberAccount = await connection.queryAsync(
+      "SELECT * FROM member WHERE account = ?",
+      req.body.account
+    );
+
+    if (memberAccount.length > 0) {
+      return res.json({
+        code: "106",
+        message: "此帳號已使用過",
       });
     }
 
