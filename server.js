@@ -55,12 +55,18 @@ let discussRouter = require("./routers/discuss");
 app.use("/api/discuss", discussRouter);
 
 
-// // 活動頁面路由
-
+// 活動頁面路由
 let conRouter = require("./routers/contest/contestPage.js");
 app.use("/api/contest", conRouter);
 
+// 報名頁面路由
+let keyRouter = require("./routers/contest/signUp.js");
+app.use("/api/contest", keyRouter);
 
+
+// 投票頁面路由
+let voteRouter = require("./routers/contest/vote.js");
+app.use("/api/vote",voteRouter);
 
 
 app.use((req, res, next) => {
