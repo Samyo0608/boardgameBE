@@ -3,6 +3,11 @@ const session = require("express-session");
 const router = express.Router();
 const connection = require("../../connection/db.js");
 const path = require("path");
+
+//修改密碼用(bcrypt加密、validationResult驗證)
+const bcrypt = require("bcrypt");
+const { body, validationResult } = require("express-validator");
+
 //圖片用multer
 const multer = require("multer");
 
@@ -73,6 +78,7 @@ const upload = multer({
   },
 });
 
+// 照片上傳router
 router.post(
   "/memSelf/photo/:account",
   // single 只接受單一檔案 -> 最終資訊會存放在req.file
@@ -99,5 +105,67 @@ router.post(
     }
   }
 );
+
+// 密碼驗證
+const passwordRules = [
+  body("password")
+    .isLength({ min: 8 })
+    .withMessage("密碼不得低於8碼")
+    .isLength({ max: 20 })
+    .withMessage("密碼不得低於20碼"),
+  body("newPassword")
+    .isLength({ min: 8 })
+    .withMessage("密碼不得低於8碼")
+    .isLength({ max: 20 })
+    .withMessage("密碼不得低於20碼"),
+  body("reNewPassword")
+    // value 是前端使用者的 input 輸入的值
+    // custom 自定義的驗證函式
+    .custom((value, { req }) => {
+      return value === req.body.newPassword;
+    })
+    .withMessage("新密碼驗證錯誤"),
+];
+
+// 新密碼修改router
+router.post("/rePassword/:account", passwordRules, async (req, res) => {
+  const error = validationResult(req);
+  if (!error.isEmpty()) {
+    return res.status(101).json({ code: 101, message: error.array() });
+  }
+  try {
+    if (req.session.member) {
+      // 先取出資料庫儲存的密碼
+      let userData = await connection.queryAsync(
+        "SELECT password FROM member WHERE account = ?",
+        req.session.member.account
+      );
+
+      // 建立加密新密碼，強度10
+      let BCRpassword = await bcrypt.hash(req.body.newPassword, 10);
+
+      // 比較加密後的新密碼與舊密碼
+      let result = await bcrypt.compare(
+        req.body.password,
+        userData[0].password
+      );
+      console.log("匹配結果", result);
+      // 錯誤返回，正確就繼續
+      if (result === false) {
+        res.json({ code: "401", message: "舊密碼輸入錯誤" });
+      } else {
+        // 上傳新密碼
+        let updatePassword = await connection.queryAsync(
+          "UPDATE member SET password = ? WHERE account = ?",
+          [BCRpassword, req.params.account]
+        );
+        res.json({ code: "408", message: "修改正確" });
+      }
+    }
+  } catch (e) {
+    res.json({ code: "404", message: e.message });
+    console.log(e);
+  }
+});
 
 module.exports = router;
