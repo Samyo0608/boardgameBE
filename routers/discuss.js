@@ -13,6 +13,41 @@ router.get("/", async (req, res) => {
   res.json(data);
 });
 
+// 列表：分類:全部-資料
+router.get("/all", async (req, res) => {
+  let data = await connection.queryAsync(
+    "SELECT A.id,A.type,A.title,A.user_id as i_user_id,B.user_id,temp.created_at,temp.cot FROM discuss as A JOIN (SELECT MAX(created_at) as created_at,discuss_id,COUNT(*) as cot FROM discuss_content GROUP BY discuss_id) as temp  ON A.id=temp.discuss_id JOIN discuss_content as B on B.created_at=temp.created_at ORDER BY temp.created_at DESC"
+  );
+  res.json(data);
+});
+
+// 列表：家庭資料
+router.get("/family", async (req, res) => {
+  let data = await connection.queryAsync(
+    "SELECT A.id,A.type,A.title,A.user_id as i_user_id,B.user_id,temp.created_at,temp.cot FROM discuss as A JOIN (SELECT MAX(created_at) as created_at,discuss_id,COUNT(*) as cot FROM discuss_content GROUP BY discuss_id) as temp  ON A.id=temp.discuss_id JOIN discuss_content as B on B.created_at=temp.created_at WHERE A.type=? ORDER BY temp.created_at DESC",
+    [decodeURI("家庭")]
+  );
+  res.json(data);
+});
+
+// 列表：卡牌資料
+router.get("/card", async (req, res) => {
+  let data = await connection.queryAsync(
+    "SELECT A.id,A.type,A.title,A.user_id as i_user_id,B.user_id,temp.created_at,temp.cot FROM discuss as A JOIN (SELECT MAX(created_at) as created_at,discuss_id,COUNT(*) as cot FROM discuss_content GROUP BY discuss_id) as temp  ON A.id=temp.discuss_id JOIN discuss_content as B on B.created_at=temp.created_at WHERE A.type=? ORDER BY temp.created_at DESC",
+    [decodeURI("卡牌")]
+  );
+  res.json(data);
+});
+
+// 列表：策略資料
+router.get("/trag", async (req, res) => {
+  let data = await connection.queryAsync(
+    "SELECT A.id,A.type,A.title,A.user_id as i_user_id,B.user_id,temp.created_at,temp.cot FROM discuss as A JOIN (SELECT MAX(created_at) as created_at,discuss_id,COUNT(*) as cot FROM discuss_content GROUP BY discuss_id) as temp  ON A.id=temp.discuss_id JOIN discuss_content as B on B.created_at=temp.created_at WHERE A.type=? ORDER BY temp.created_at DESC",
+    [decodeURI("策略")]
+  );
+  res.json(data);
+});
+
 // 點擊單筆進入查看
 router.get("/reply/:discuss_id", async (req, res) => {
   let data = await connection.queryAsync(
@@ -51,7 +86,7 @@ router.get("/replyCount", async (req, res) => {
 
 // 新增回覆
 router.post("/insertDiscuss", upload.array(), async (req, res) => {
-  console.log("req.body", req.body);
+  // console.log("req.body", req.body);
   let data = await connection.queryAsync(
     "INSERT INTO discuss_content (discuss_id, user_id, content, floor,created_at) VALUES (?)",
     [
@@ -66,6 +101,92 @@ router.post("/insertDiscuss", upload.array(), async (req, res) => {
   );
   res.send(req.body);
   // res.json({ code: "0", message: "已建立" });
+});
+
+// 收藏功能
+router.post("/keep", async (req, res) => {
+  let data = await connection.queryAsync(
+    "INSERT INTO discuss_keep (discuss_id, user_id) VALUES (?)",
+    [[req.body.discuss_id, req.body.user_id]]
+  );
+  res.json(data);
+  // res.json({ code: "0", message: "已建立" });
+});
+
+// 收藏功能
+router.post("/keepStatus", async (req, res) => {
+  let data = await connection.queryAsync(
+    "SELECT * FROM discuss_keep WHERE discuss_id=? AND user_id=?",
+    [req.body.discuss_id, req.body.user_id]
+  );
+  res.json(data);
+
+  // res.json({ code: "0", message: "已建立" });
+});
+
+// 新討論>>抓種類
+router.get("/newDiscussType", async (req, res) => {
+  let data = await connection.queryAsync(
+    "SELECT type FROM discuss GROUP BY type"
+  );
+  res.json(data);
+});
+
+// 新增討論串
+router.post("/addNewDiscuss", async (req, res) => {
+  let data = await connection.queryAsync(
+    "INSERT INTO discuss (type,title,created_at,user_id) VALUES (?)",
+    [
+      [
+        req.body.type,
+        req.body.title,
+        moment().format("YYYY/MM/DD HH:mm:ss"),
+        req.body.user_id,
+      ],
+    ]
+  );
+  // console.log(data);
+
+  // let lastId = await connection.queryAsync(
+  //   "SELECT LAST_INSERT_ID() AS lastId FROM discuss LIMIT 1"
+  // );
+
+  // console.log(lastId[0].lastId);
+  res.status(200).send(data.insertId.toString());
+  // res.json({ code: "0", message: "已建立" });
+});
+
+// 新增討論串樓主內容
+router.post("/addNewDiscussContent", async (req, res) => {
+  // console.log(req.body);
+  let data = await connection.queryAsync(
+    "INSERT INTO discuss_content (discuss_id, user_id, content, floor,created_at) VALUES (?)",
+    [
+      [
+        req.body.lastId,
+        req.body.user_id,
+        req.body.content,
+        req.body.floor,
+        moment().format("YYYY/MM/DD HH:mm:ss"),
+      ],
+    ]
+  );
+  // res.send(req.body);
+  res.json({ code: "0", message: "已建立" });
+});
+
+// 搜尋討論區
+// 列表：全部資料
+router.post("/searchDiscuss", async (req, res) => {
+  let data = await connection.queryAsync(
+    "SELECT A.id,A.type,A.title,A.user_id as i_user_id,B.user_id,temp.created_at,temp.cot FROM discuss as A JOIN (SELECT MAX(created_at) as created_at,discuss_id,COUNT(*) as cot FROM discuss_content GROUP BY discuss_id) as temp  ON A.id=temp.discuss_id JOIN discuss_content as B on B.created_at=temp.created_at WHERE A.title LIKE ? or A.user_id LIKE ? or B.user_id LIKE ? ORDER BY temp.created_at DESC",
+    [
+      "%" + req.body.keyword + "%",
+      "%" + req.body.keyword + "%",
+      "%" + req.body.keyword + "%",
+    ]
+  );
+  res.json(data);
 });
 
 module.exports = router;
