@@ -12,4 +12,11 @@ router.get("/", async (req, res) => {
   res.json(data);
 });
 
+// router.get("/:id", async (req, res) => {
+//   let data = await connection.queryAsync(
+//     "SELECT * FROM product WHERE id = ?;",
+//     [req.params.id]
+//   );
+// });
+
 module.exports = router;

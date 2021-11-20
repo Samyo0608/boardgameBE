@@ -72,6 +72,9 @@ app.use("/api/vote", voteRouter);
 // 租賃頁面路由
 let bookingRouter = require("./routers/booking/bookingBE.js");
 app.use("/api/booking", bookingRouter);
+// 遊戲頁面路由
+let productRouter = require("./routers/product/product.js");
+app.use("/api/productlist", productRouter);
 
 app.use((req, res, next) => {
   console.log(`${req.url} 找不到路由`);
