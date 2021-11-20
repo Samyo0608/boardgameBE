@@ -23,6 +23,8 @@ app.use(express.urlencoded({ extended: true }));
 // 使用這個中間件，才可以解析得到 json 的資料
 app.use(express.json());
 
+// app.use(express.json({ limit: "28mb" }));
+
 //--------------express-session---------------
 const expressSession = require("express-session");
 let FileStore = require("session-file-store")(expressSession);
@@ -38,6 +40,9 @@ app.use(
     resave: false,
   })
 );
+
+// 使用public這個資料夾的東西，賦予它http的網域型態
+http: app.use("/public", express.static("public"));
 
 //router(路由)都寫在這下面，內部程式請在router資料夾下完成
 
