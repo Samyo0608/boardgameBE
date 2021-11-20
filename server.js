@@ -62,14 +62,29 @@ app.use("/api/member", memberRouter);
 let discussRouter = require("./routers/discuss");
 app.use("/api/discuss", discussRouter);
 
-// // 活動頁面路由
+// 活動頁面路由
 let conRouter = require("./routers/contest/contestPage.js");
 app.use("/api/contest", conRouter);
 
-// app.use((req, res, next) => {
-//   console.log(`${req.url} 找不到路由`);
-//   next();
-// });
+// 報名頁面路由
+let keyRouter = require("./routers/contest/signUp.js");
+app.use("/api/contest", keyRouter);
+
+// 投票頁面路由
+let voteRouter = require("./routers/contest/vote.js");
+app.use("/api/vote", voteRouter);
+
+// 租賃頁面路由
+let bookingRouter = require("./routers/booking/bookingBE.js");
+app.use("/api/booking", bookingRouter);
+// 遊戲頁面路由
+let productRouter = require("./routers/product/product.js");
+app.use("/api/productlist", productRouter);
+
+app.use((req, res, next) => {
+  console.log(`${req.url} 找不到路由`);
+  next();
+});
 
 app.use((err, req, res, next) => {
   // 當前面的程式碼發生錯誤時，會統一丟到這裡來處理
