@@ -23,7 +23,8 @@ const registerRules = [
     .withMessage("密碼不得超過20碼"),
   body("rePassword")
     .custom((value, { req }) => {
-      // 輸入值和錯誤資訊內的密碼不一致
+      // value 是前端使用者的 input 輸入的值
+      // custom 自定義的驗證函式
       return value === req.body.password;
     })
     .withMessage("密碼不一致"),

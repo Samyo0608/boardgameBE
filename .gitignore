@@ -5,3 +5,4 @@
 
 # vs code extension: REST CLIENT
 *.http
+/public
