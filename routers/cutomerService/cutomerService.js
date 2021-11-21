@@ -4,20 +4,17 @@ const connection = require("../../connection/db.js");
 const moment = require("moment");
 
 
-router.get("/:account", async (req, res) => {
-  let user = await connection.queryAsync(
-    "SELECT * FROM member WHERE account = ?;",
-    [req.params.account]
+router.get("/questions", async (req, res) => {
+  let questions = await connection.queryAsync(
+    "SELECT * FROM question WHERE user_id = ?;",
+    [req.query.user_id]
   );
-  if (req.session.member) {
-    res.json(user);
-  } else {
-    res.json({ code: 700, message: "失敗" });
-  }
+  res.json(questions);
+
 });
 
 
-router.post("/question", async (req, res) => {
+router.post("/questions", async (req, res) => {
   console.log("req.body", req.body);
   let data = await connection.queryAsync(
     "INSERT INTO question (user_id, category, subcategory, content, created_at) VALUES (?)",
@@ -32,7 +29,6 @@ router.post("/question", async (req, res) => {
     ]
   );
   res.send(req.body);
-  // res.json({ code: "0", message: "已建立" });
 });
 
 router.put("/memSelf/:account", async (req, res) => {
