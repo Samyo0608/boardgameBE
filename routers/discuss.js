@@ -13,6 +13,15 @@ router.get("/", async (req, res) => {
   res.json(data);
 });
 
+// 列表：會員收藏資料
+router.post("/memberDiscuss", async (req, res) => {
+  let data = await connection.queryAsync(
+    "SELECT A.id,A.type,A.title,A.user_id as i_user_id,B.user_id,temp.created_at,temp.cot FROM discuss as A JOIN (SELECT MAX(created_at) as created_at,discuss_id,COUNT(*) as cot FROM discuss_content GROUP BY discuss_id) as temp  ON A.id=temp.discuss_id JOIN discuss_content as B on B.created_at=temp.created_at JOIN discuss_keep as C on C.discuss_id=A.id WHERE C.user_id=? ORDER BY temp.created_at DESC",
+    [req.body.id]
+  );
+  res.json(data);
+});
+
 // 列表：分類:全部-資料
 router.get("/all", async (req, res) => {
   let data = await connection.queryAsync(
@@ -103,17 +112,25 @@ router.post("/insertDiscuss", upload.array(), async (req, res) => {
   // res.json({ code: "0", message: "已建立" });
 });
 
-// 收藏功能
+// 收藏功能-寫入
 router.post("/keep", async (req, res) => {
   let data = await connection.queryAsync(
     "INSERT INTO discuss_keep (discuss_id, user_id) VALUES (?)",
     [[req.body.discuss_id, req.body.user_id]]
   );
-  res.json(data);
-  // res.json({ code: "0", message: "已建立" });
+  res.json({ code: "0", message: "已加入收藏" });
 });
 
-// 收藏功能
+// 收藏功能-刪除
+router.post("/keepDelete", async (req, res) => {
+  let data = await connection.queryAsync(
+    "DELETE FROM discuss_keep WHERE discuss_id = ? AND user_id = ?",
+    [req.body.discuss_id, req.body.user_id]
+  );
+  res.json({ code: "0", message: "已移除收藏" });
+});
+
+// 收藏功能-判斷狀態
 router.post("/keepStatus", async (req, res) => {
   let data = await connection.queryAsync(
     "SELECT * FROM discuss_keep WHERE discuss_id=? AND user_id=?",
