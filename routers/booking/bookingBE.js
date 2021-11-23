@@ -1,5 +1,4 @@
 const express = require("express");
-const { now } = require("moment");
 const router = express.Router();
 const moment = require("moment");
 
@@ -15,15 +14,16 @@ router.post("/", async (req, res) => {
 router.post("/order", async (req, res) => {
   console.log("req.body", req.body);
   let result = await connection.queryAsync(
-    "INSERT INTO booking (room,name,phone,email,date,time) VALUES (?)",
+    "INSERT INTO booking (room,name,phone,email,startTime,endTime,order_date) VALUES (?)",
     [
       [
         req.body.room,
         req.body.name,
         req.body.phone,
         req.body.email,
-        req.body.date,
-        req.body.time,
+        req.body.startTime,
+        req.body.endTime,
+        moment().format("YYYY-MM-DD"),
       ],
     ]
   );
