@@ -34,6 +34,13 @@ router.post("/keyin",registerRules ,async (req, res) => {
     //將前端拿到的資料寫入資料庫
 
     let keyinData = await connection.queryAsync(
+        // "INSERT INTO signup(contest_title, contest_name, contest_phone,contest_email) VALUES (?,?,?,?)",
+        // [
+        //     req.body.contest_title,
+        //     req.body.contest_name,
+        //     req.body.contest_phone,
+        //     req.body.contest_email,
+        // ],
         "INSERT INTO signup(contest_title, contest_name, contest_phone,contest_email) VALUES (?,?,?,?)",
         [
             req.body.contest_title,
@@ -41,8 +48,21 @@ router.post("/keyin",registerRules ,async (req, res) => {
             req.body.contest_phone,
             req.body.contest_email,
         ],
+        
+
+
     );
 
     });
+
+    router.post("/update", async (req, res)=>{
+        let numData = await connection.queryAsync(
+            "UPDATE contest SET contest_title_no = ?  WHERE contest_title = ?",
+            [
+                req.body.contest_title_no,
+                req.body.contest_title,
+            ],
+        )
+    })
   
 module.exports = router;
