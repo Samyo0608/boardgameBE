@@ -70,7 +70,7 @@ app.use("/api/contest", conRouter);
 let keyRouter = require("./routers/contest/signUp.js");
 app.use("/api/contest", keyRouter);
 
-// 投票頁面路由
+// 投票頁面顯示投票內容路由
 let voteRouter = require("./routers/contest/vote.js");
 app.use("/api/vote", voteRouter);
 
