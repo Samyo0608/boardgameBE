@@ -19,5 +19,17 @@ router.get("/:id", async (req,res) =>{
     ])
 })
 
+// 寫入vote資料到product資料表
+router.post("/addVoted", async (req, res)=>{
+    let numData = await connection.queryAsync(
+        "UPDATE product SET product_vote = ?  WHERE product_name = ?",
+        [
+            req.body.product_vote,
+            req.body.product_name,
+        ],
+    )
+})
+
+
 
 module.exports = router;
