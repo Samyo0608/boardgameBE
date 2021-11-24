@@ -11,4 +11,12 @@ router.get("/", async (req, res) => {
   res.json(product);
 });
 
+router.get("/:account", async (req, res) => {
+  let member = await connection.queryAsync(
+    "SELECT account, name, email, phone ,address, point FROM member WHERE account = ?",
+    [req.params.account]
+  );
+  res.json(member);
+});
+
 module.exports = router;
