@@ -44,7 +44,7 @@ router.get("/family", async (req, res) => {
   res.json(data);
 });
 
-router.get("/all", async (req, res) => {
+router.get("/:id", async (req, res) => {
   let data = await connection.queryAsync(
     "SELECT * FROM product WHERE id = ?;",
     [req.params.id]
