@@ -70,7 +70,7 @@ app.use("/api/contest", conRouter);
 let keyRouter = require("./routers/contest/signUp.js");
 app.use("/api/contest", keyRouter);
 
-// 投票頁面路由
+// 投票頁面顯示投票內容路由
 let voteRouter = require("./routers/contest/vote.js");
 app.use("/api/vote", voteRouter);
 
@@ -85,6 +85,10 @@ app.use("/api/productlist", productRouter);
 // 客服頁面路由
 let cutomerServiceRouter = require("./routers/cutomerService/cutomerService.js");
 app.use("/api/cutomerService", cutomerServiceRouter);
+
+// 產品頁面路由(測試)
+let cartRouter = require("./routers/cart/cart.js");
+app.use("/api/cart", cartRouter);
 
 app.use((req, res, next) => {
   console.log(`${req.url} 找不到路由`);
