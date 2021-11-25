@@ -12,7 +12,7 @@ const router = express.Router();
 app.use(
   cors({
     //網域指定限制
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
     //儲存cookie
     credentials: true,
   })
