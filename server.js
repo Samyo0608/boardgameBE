@@ -80,9 +80,14 @@ app.use("/api/vote", voteRouter);
 // 租賃頁面路由
 let bookingRouter = require("./routers/booking/bookingBE.js");
 app.use("/api/booking", bookingRouter);
+
 // 遊戲頁面路由
 let productRouter = require("./routers/product/product.js");
 app.use("/api/productlist", productRouter);
+
+// 客服頁面路由
+let cutomerServiceRouter = require("./routers/cutomerService/cutomerService.js");
+app.use("/api/cutomerService", cutomerServiceRouter);
 
 // 購物車
 let cartRouter = require("./routers/cart/cart.js");
@@ -99,6 +104,11 @@ app.use((err, req, res, next) => {
   console.error("錯誤處理中間件:", err);
   // 這裡需要處理什麼事？
   res.status(500).json({ code: "500" });
+});
+
+// 避免server crash
+process.on('uncaughtException', function (err) {
+  console.log(err);
 });
 
 // --------------聆聽(port:3001)----------------

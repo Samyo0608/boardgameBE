@@ -2,4 +2,7 @@
 .env
 /node_modules
 /sessions
+
+# vs code extension: REST CLIENT
+*.http
 /public
