@@ -13,6 +13,41 @@ router.get("/", async (req, res) => {
   res.json(data);
 });
 
+// 列表：討論區首頁撈文章內容
+router.get("/indexContent", async (req, res) => {
+  let data = await connection.queryAsync(
+    "SELECT discuss_id,content,MIN(created_at) as created_at FROM discuss_content GROUP BY discuss_id"
+  );
+  res.json(data);
+});
+
+// 編輯文章內容-初始內容
+router.post("/editReplyContent", async (req, res) => {
+  let data = await connection.queryAsync(
+    "SELECT content FROM discuss_content WHERE id=?",
+    [req.body]
+  );
+  res.json(data);
+});
+
+// 編輯文章內容-送出修改
+router.post("/doEditReply", async (req, res) => {
+  let data = await connection.queryAsync(
+    "UPDATE discuss_content SET content=? WHERE id=? AND user_id=?",
+    [req.body.content, req.body.id, req.session.member.id]
+  );
+  res.json(data);
+});
+
+// 編輯文章內容-刪除
+router.post("/deleteReply", async (req, res) => {
+  let data = await connection.queryAsync(
+    "UPDATE discuss_content SET valid=0,content='=====此回覆已被使用者刪除=====' WHERE id=? AND user_id=?",
+    [req.body.id, req.session.member.id]
+  );
+  res.json({ code: "0", message: "已刪除回復" });
+});
+
 // 列表：會員收藏資料
 router.post("/memberDiscuss", async (req, res) => {
   let data = await connection.queryAsync(
@@ -60,7 +95,7 @@ router.get("/trag", async (req, res) => {
 // 點擊單筆進入查看
 router.get("/reply/:discuss_id", async (req, res) => {
   let data = await connection.queryAsync(
-    "SELECT * FROM discuss_content WHERE discuss_id=?",
+    "SELECT A.*,B.account as account,B.photo as photo FROM discuss_content as A JOIN member as B ON A.user_id=B.id WHERE A.discuss_id=?",
     [decodeURI(req.params.discuss_id)]
     // 後端收到中文要用decodeURI
   );
@@ -95,13 +130,12 @@ router.get("/replyCount", async (req, res) => {
 
 // 新增回覆
 router.post("/insertDiscuss", upload.array(), async (req, res) => {
-  // console.log("req.body", req.body);
   let data = await connection.queryAsync(
     "INSERT INTO discuss_content (discuss_id, user_id, content, floor,created_at) VALUES (?)",
     [
       [
         req.body.discuss_id,
-        req.body.user_id,
+        req.session.member.id,
         req.body.content,
         req.body.floor,
         moment().format("YYYY/MM/DD HH:mm:ss"),
@@ -116,7 +150,7 @@ router.post("/insertDiscuss", upload.array(), async (req, res) => {
 router.post("/keep", async (req, res) => {
   let data = await connection.queryAsync(
     "INSERT INTO discuss_keep (discuss_id, user_id) VALUES (?)",
-    [[req.body.discuss_id, req.body.user_id]]
+    [[req.body.discuss_id, req.session.member.id]]
   );
   res.json({ code: "0", message: "已加入收藏" });
 });
@@ -125,7 +159,7 @@ router.post("/keep", async (req, res) => {
 router.post("/keepDelete", async (req, res) => {
   let data = await connection.queryAsync(
     "DELETE FROM discuss_keep WHERE discuss_id = ? AND user_id = ?",
-    [req.body.discuss_id, req.body.user_id]
+    [req.body.discuss_id, req.session.member.id]
   );
   res.json({ code: "0", message: "已移除收藏" });
 });
@@ -134,7 +168,7 @@ router.post("/keepDelete", async (req, res) => {
 router.post("/keepStatus", async (req, res) => {
   let data = await connection.queryAsync(
     "SELECT * FROM discuss_keep WHERE discuss_id=? AND user_id=?",
-    [req.body.discuss_id, req.body.user_id]
+    [req.body.discuss_id, req.session.member.id]
   );
   res.json(data);
 
@@ -151,7 +185,7 @@ router.post("/likeData", async (req, res) => {
 router.post("/like", async (req, res) => {
   let data = await connection.queryAsync(
     "INSERT INTO discuss_like (discuss_content_id, user_id) VALUES (?)",
-    [[req.body.discuss_content_id, req.body.user_id]]
+    [[req.body.discuss_content_id, req.session.member.id]]
   );
   res.json({ code: "0", message: "已發送讚" });
 });
@@ -160,7 +194,7 @@ router.post("/like", async (req, res) => {
 router.post("/likeDelete", async (req, res) => {
   let data = await connection.queryAsync(
     "DELETE FROM discuss_like WHERE discuss_content_id = ? AND user_id = ?",
-    [req.body.discuss_content_id, req.body.user_id]
+    [req.body.discuss_content_id, req.session.member.id]
   );
   res.json({ code: "0", message: "已移除讚" });
 });
@@ -182,7 +216,7 @@ router.post("/addNewDiscuss", async (req, res) => {
         req.body.type,
         req.body.title,
         moment().format("YYYY/MM/DD HH:mm:ss"),
-        req.body.user_id,
+        req.session.member.id,
       ],
     ]
   );
@@ -205,7 +239,7 @@ router.post("/addNewDiscussContent", async (req, res) => {
     [
       [
         req.body.lastId,
-        req.body.user_id,
+        req.session.member.id,
         req.body.content,
         req.body.floor,
         moment().format("YYYY/MM/DD HH:mm:ss"),
