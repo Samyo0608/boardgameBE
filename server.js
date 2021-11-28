@@ -49,12 +49,15 @@ http: app.use("/public", express.static("public"));
 // let XXX = require("程式路徑")
 // app.use("你想設的路徑(查json用)", XXX)
 
+// 登入路由
 let authRouter = require("./routers/loginRegister/auth.js");
 app.use("/api/auth", authRouter);
 
+// session相關路由
 let sessionRouter = require("./routers/loginRegister/session.js");
 app.use("/api/session", sessionRouter);
 
+// member相關路由
 let memberRouter = require("./routers/memberCenter/memSelf.js");
 app.use("/api/member", memberRouter);
 
@@ -81,7 +84,7 @@ app.use("/api/booking", bookingRouter);
 let productRouter = require("./routers/product/product.js");
 app.use("/api/productlist", productRouter);
 
-// 產品頁面路由(測試)
+// 購物車
 let cartRouter = require("./routers/cart/cart.js");
 app.use("/api/cart", cartRouter);
 
