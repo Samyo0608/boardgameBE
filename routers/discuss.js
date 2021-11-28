@@ -141,6 +141,30 @@ router.post("/keepStatus", async (req, res) => {
   // res.json({ code: "0", message: "已建立" });
 });
 
+// 按讚功能-撈資料
+router.post("/likeData", async (req, res) => {
+  let data = await connection.queryAsync("SELECT * FROM discuss_like");
+  res.json(data);
+});
+
+// 按讚功能-寫入
+router.post("/like", async (req, res) => {
+  let data = await connection.queryAsync(
+    "INSERT INTO discuss_like (discuss_content_id, user_id) VALUES (?)",
+    [[req.body.discuss_content_id, req.body.user_id]]
+  );
+  res.json({ code: "0", message: "已發送讚" });
+});
+
+// 按讚功能-刪除
+router.post("/likeDelete", async (req, res) => {
+  let data = await connection.queryAsync(
+    "DELETE FROM discuss_like WHERE discuss_content_id = ? AND user_id = ?",
+    [req.body.discuss_content_id, req.body.user_id]
+  );
+  res.json({ code: "0", message: "已移除讚" });
+});
+
 // 新討論>>抓種類
 router.get("/newDiscussType", async (req, res) => {
   let data = await connection.queryAsync(

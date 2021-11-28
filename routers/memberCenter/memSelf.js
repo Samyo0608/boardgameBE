@@ -17,7 +17,7 @@ let app = express();
 router.get("/:account", async (req, res) => {
   let user = await connection.queryAsync(
     "SELECT * FROM member WHERE account = ?;",
-    [req.params.account]
+    [req.session.member.account]
   );
   if (req.session.member) {
     res.json(user);
@@ -37,7 +37,7 @@ router.post("/memSelf/:account", async (req, res) => {
       req.body.email,
       req.body.name,
       req.body.phone,
-      req.params.account,
+      req.session.member.account,
     ]
   );
 
@@ -92,7 +92,7 @@ router.post(
       // const str = buff.toString("utf-8");
       let photoUpdate = await connection.queryAsync(
         "UPDATE member SET photo = ? WHERE account = ?",
-        [req.file.filename, req.body.account]
+        [req.file.filename, req.session.member.account]
       );
 
       res.json({ message: "更新成功" });
@@ -166,6 +166,15 @@ router.post("/rePassword/:account", passwordRules, async (req, res) => {
     res.json({ code: "404", message: e.message });
     console.log(e);
   }
+});
+
+router.get("/productOrder/:account", async (req, res) => {
+  let productOrder = await connection.queryAsync(
+    "SELECT * FROM product_order WHERE user_account = ?",
+    [req.session.member.account]
+  );
+
+  res.json(productOrder);
 });
 
 module.exports = router;
