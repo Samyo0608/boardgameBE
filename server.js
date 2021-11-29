@@ -12,7 +12,7 @@ const router = express.Router();
 app.use(
   cors({
     //網域指定限制
-    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+    origin: "http://localhost:3000",
     //儲存cookie
     credentials: true,
   })
@@ -49,15 +49,12 @@ http: app.use("/public", express.static("public"));
 // let XXX = require("程式路徑")
 // app.use("你想設的路徑(查json用)", XXX)
 
-// 登入路由
 let authRouter = require("./routers/loginRegister/auth.js");
 app.use("/api/auth", authRouter);
 
-// session相關路由
 let sessionRouter = require("./routers/loginRegister/session.js");
 app.use("/api/session", sessionRouter);
 
-// member相關路由
 let memberRouter = require("./routers/memberCenter/memSelf.js");
 app.use("/api/member", memberRouter);
 
@@ -80,16 +77,11 @@ app.use("/api/vote", voteRouter);
 // 租賃頁面路由
 let bookingRouter = require("./routers/booking/bookingBE.js");
 app.use("/api/booking", bookingRouter);
-
 // 遊戲頁面路由
 let productRouter = require("./routers/product/product.js");
 app.use("/api/productlist", productRouter);
 
-// 客服頁面路由
-let cutomerServiceRouter = require("./routers/cutomerService/cutomerService.js");
-app.use("/api/cutomerService", cutomerServiceRouter);
-
-// 購物車
+// 產品頁面路由(測試)
 let cartRouter = require("./routers/cart/cart.js");
 app.use("/api/cart", cartRouter);
 
@@ -104,11 +96,6 @@ app.use((err, req, res, next) => {
   console.error("錯誤處理中間件:", err);
   // 這裡需要處理什麼事？
   res.status(500).json({ code: "500" });
-});
-
-// 避免server crash
-process.on('uncaughtException', function (err) {
-  console.log(err);
 });
 
 // --------------聆聽(port:3001)----------------
