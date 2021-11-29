@@ -40,7 +40,7 @@ router.post("/order/:account", async (req, res) => {
   let order = await connection.queryAsync(
     "INSERT INTO product_order (user_account,customer_name,customer_phone,customer_email, customer_address,total,created_time,order_check,product_name,product_price,product_count) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
     [
-      req.seesion.member.account,
+      req.session.member.account,
       req.body.name,
       req.body.phone,
       req.body.email,
