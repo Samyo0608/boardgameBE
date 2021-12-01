@@ -38,6 +38,7 @@ app.use(
     name: "userSession",
     saveUninitialized: false,
     resave: false,
+    cookie: { maxAge: 60 * 60 * 1000 },
   })
 );
 
@@ -96,6 +97,11 @@ app.use((err, req, res, next) => {
   console.error("錯誤處理中間件:", err);
   // 這裡需要處理什麼事？
   res.status(500).json({ code: "500" });
+});
+
+// 避免server crash
+process.on("uncaughtException", function (err) {
+  console.log(err);
 });
 
 // --------------聆聽(port:3001)----------------
