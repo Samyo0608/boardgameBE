@@ -38,6 +38,7 @@ app.use(
     name: "userSession",
     saveUninitialized: false,
     resave: false,
+    cookie: { maxAge: 60 * 60 * 1000 },
   })
 );
 
@@ -107,7 +108,7 @@ app.use((err, req, res, next) => {
 });
 
 // 避免server crash
-process.on('uncaughtException', function (err) {
+process.on("uncaughtException", function (err) {
   console.log(err);
 });
 
