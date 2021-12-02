@@ -92,12 +92,11 @@ router.post(
       // const str = buff.toString("utf-8");
       let photoUpdate = await connection.queryAsync(
         "UPDATE member SET photo = ? WHERE account = ?",
-        [req.file.filename, req.session.member.account]
+        [req.file.filename, req.params.account]
       );
 
       res.json({ message: "更新成功" });
       console.log("成功");
-      // console.log(req.body.account);
       // console.log(req.file);
     } catch (e) {
       console.log("無法更新");
