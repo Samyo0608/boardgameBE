@@ -155,9 +155,7 @@ router.post("/login", async (req, res) => {
 
 //只要登出，所以從網址get就可以
 router.get("/logout", (req, res) => {
-  req.session.destroy(function (err) {
-    res.redirect("/");
-  });
+  req.session.member = null;
   // 讓cookie立刻過期(為了登出後可以讓忘記密碼正常使用)
   res.cookie("userSession", "", { expires: new Date() });
   res.json({ message: "登出成功" });
