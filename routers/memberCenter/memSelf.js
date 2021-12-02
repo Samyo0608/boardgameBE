@@ -92,12 +92,11 @@ router.post(
       // const str = buff.toString("utf-8");
       let photoUpdate = await connection.queryAsync(
         "UPDATE member SET photo = ? WHERE account = ?",
-        [req.file.filename, req.session.member.account]
+        [req.file.filename, req.params.account]
       );
 
       res.json({ message: "更新成功" });
       console.log("成功");
-      // console.log(req.body.account);
       // console.log(req.file);
     } catch (e) {
       console.log("無法更新");
@@ -144,12 +143,12 @@ router.post("/rePassword/:account", passwordRules, async (req, res) => {
       // 建立加密新密碼，強度10
       let BCRpassword = await bcrypt.hash(req.body.newPassword, 10);
 
-      // 比較加密後的新密碼與舊密碼
+      // 比較加密後的資料庫原密碼密碼與舊密碼
       let result = await bcrypt.compare(
         req.body.password,
         userData[0].password
       );
-      console.log("匹配結果", result);
+      // console.log("匹配結果", result);
       // 錯誤返回，正確就繼續
       if (result === false) {
         res.json({ code: "401", message: "舊密碼輸入錯誤" });
@@ -157,7 +156,7 @@ router.post("/rePassword/:account", passwordRules, async (req, res) => {
         // 上傳新密碼
         let updatePassword = await connection.queryAsync(
           "UPDATE member SET password = ? WHERE account = ?",
-          [BCRpassword, req.params.account]
+          [BCRpassword, req.session.member.account]
         );
         res.json({ code: "408", message: "修改正確" });
       }

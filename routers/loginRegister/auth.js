@@ -5,6 +5,8 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 // 資料庫連線要求定義
 const connection = require("../../connection/db.js");
+// email信件寄出
+const nodemailer = require("nodemailer");
 
 //-----------------身分驗證-----------------------
 
@@ -84,7 +86,7 @@ router.post("/register", registerRules, async (req, res) => {
     // 上傳至資料庫
     let memberData = await connection.queryAsync(
       "INSERT INTO member (email, password, point,account) VALUES (?,?,?,?)",
-      [req.body.email, newPassword, 50, req.body.account]
+      [req.body.email, newPassword, 0, req.body.account]
     );
     // connection.query(
     //   "INSERT INTO (email, password) VALUES (? ,?)",
@@ -153,9 +155,123 @@ router.post("/login", async (req, res) => {
 
 //只要登出，所以從網址get就可以
 router.get("/logout", (req, res) => {
-  req.session.member = null;
-
+  req.session.destroy();
+  // 讓cookie立刻過期(為了登出後可以讓忘記密碼正常使用)
+  res.cookie("userSession", "", { expires: new Date() });
   res.json({ message: "登出成功" });
+});
+
+router.get("/session", (req, res) => {
+  if (req.session) {
+    return res.json(req.session);
+  }
+});
+
+//---------------忘記密碼-------------------------
+let numInit = {}; // 全域驗證碼(用來驗證比對)
+let UserEmail = {}; //全域信箱(寫入新密碼用)
+
+router.post("/forget", async (req, res) => {
+  let forget = await connection.queryAsync(
+    "SELECT account,email FROM member WHERE email = ?",
+    [req.body.reEmail]
+  );
+  res.json(forget);
+
+  if (forget.length > 0) {
+    // 定義email連線伺服器、email帳號密碼
+    const config = {
+      service: "gmail",
+      auth: {
+        user: `${process.env.EMAIL_ADDRESS}`,
+        pass: `${process.env.EMAIL_PASSWORD}`,
+      },
+    };
+
+    const transporter = nodemailer.createTransport(config);
+
+    // 隨機6碼 *Math.random()只會產生0~1之間的小數，所以要*10
+    const createSixNum = () => {
+      let num = "";
+      for (let i = 0; i < 6; i++) {
+        num += Math.floor(Math.random() * 10);
+      }
+      return num;
+    };
+
+    let number = await createSixNum();
+
+    const mailOptions = {
+      from: `${process.env.EMAIL_ADDRESS}`,
+      to: `${forget[0].email}`,
+      subject: "遊戲職人 - 驗證碼確認",
+      text: `驗證碼為` + number,
+    };
+    transporter.sendMail(mailOptions, function (err, res) {
+      if (err) {
+        console.error("error", err);
+      } else {
+        numInit["number"] = number;
+        UserEmail["email"] = mailOptions.to;
+        console.log("成功傳送mail", number);
+        res
+          .status(200)
+          .json({ code: "800", message: "已成功傳送mail", nember: number });
+      }
+    });
+  }
+});
+
+router.post("/num", async (req, res) => {
+  // console.log(numInit["number"]);
+  // console.log(UserEmail["email"]);
+  if (numInit["number"] === req.body.num) {
+    res.json({ status: "pass", message: "驗證通過" });
+    // console.log("OK");
+  } else {
+    res.json({ status: "fail", message: "驗證失敗" });
+    // console.log("fail");
+  }
+});
+
+// 密碼驗證
+const rePass = [
+  //對front-end name
+  body("newPassword")
+    .isLength({ min: 8 })
+    .withMessage("密碼不得低於8碼")
+    .isLength({ max: 20 })
+    .withMessage("密碼不得超過20碼"),
+  body("reNewPassword")
+    .custom((value, { req }) => {
+      // value 是前端使用者的 input 輸入的值
+      // custom 自定義的驗證函式
+      return value === req.body.newPassword;
+    })
+    .withMessage("密碼不一致"),
+];
+
+// 新密碼修改
+router.post("/newPassword", rePass, async (req, res) => {
+  let error = validationResult(req);
+  if (!error.isEmpty()) {
+    return res.status(101).json({ code: 101, message: error.array() });
+  }
+  let user = UserEmail["email"];
+  try {
+    // 建立加密新密碼，強度10
+    let RePassword = await bcrypt.hash(req.body.newPassword, 10);
+
+    let newPass = await connection.queryAsync(
+      "UPDATE member SET password = ? WHERE email = ?",
+      [RePassword, user]
+    );
+    // console.log(RePassword, user);
+    res.json({ code: "408", message: "密碼更新完成" });
+  } catch (e) {
+    res.json({ code: "404", message: e.message });
+    console.log(e);
+  }
 });
 
 module.exports = router;
