@@ -3,12 +3,20 @@ const router = express.Router();
 const multer = require("multer");
 var upload = multer();
 const moment = require("moment");
-const connection = require("../connection/db.js");
+const connection = require("../../connection/db.js");
 
 // 列表：全部資料
 router.get("/", async (req, res) => {
   let data = await connection.queryAsync(
-    "SELECT A.id,A.type,A.title,A.user_id as i_user_id,B.user_id,temp.created_at,temp.cot FROM discuss as A JOIN (SELECT MAX(created_at) as created_at,discuss_id,COUNT(*) as cot FROM discuss_content GROUP BY discuss_id) as temp  ON A.id=temp.discuss_id JOIN discuss_content as B on B.created_at=temp.created_at ORDER BY temp.created_at DESC"
+    "SELECT A.id,A.type,A.title,A.user_id as i_user_id,B.user_id,temp.created_at,temp.cot,C.account as i_user_name,D.account as user_name FROM discuss as A JOIN (SELECT MAX(created_at) as created_at,discuss_id,COUNT(*) as cot FROM discuss_content GROUP BY discuss_id) as temp  ON A.id=temp.discuss_id JOIN discuss_content as B on B.created_at=temp.created_at JOIN member as C ON C.id=A.user_id JOIN member as D ON D.id=B.user_id ORDER BY temp.created_at DESC"
+  );
+  res.json(data);
+});
+
+// 列表：全部資料(照回覆數)
+router.get("/discussCount", async (req, res) => {
+  let data = await connection.queryAsync(
+    "SELECT A.id,A.type,A.title,A.user_id as i_user_id,B.user_id,temp.created_at,temp.cot,C.account as i_user_name,D.account as user_name FROM discuss as A JOIN (SELECT MAX(created_at) as created_at,discuss_id,COUNT(*) as cot FROM discuss_content GROUP BY discuss_id) as temp  ON A.id=temp.discuss_id JOIN discuss_content as B on B.created_at=temp.created_at JOIN member as C ON C.id=A.user_id JOIN member as D ON D.id=B.user_id ORDER BY temp.cot DESC"
   );
   res.json(data);
 });

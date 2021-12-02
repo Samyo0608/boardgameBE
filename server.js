@@ -59,7 +59,7 @@ let memberRouter = require("./routers/memberCenter/memSelf.js");
 app.use("/api/member", memberRouter);
 
 // 引用 /api/discuss 的相關路由
-let discussRouter = require("./routers/discuss");
+let discussRouter = require("./routers/discuss/discuss");
 app.use("/api/discuss", discussRouter);
 
 // 活動頁面路由
