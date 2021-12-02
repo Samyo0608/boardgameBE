@@ -36,9 +36,9 @@ app.use(
     store: new FileStore({ path: path.join(__dirname, ".", "sessions") }),
     secret: "boardgameSession",
     name: "userSession",
-    saveUninitialized: false,
-    resave: false,
     cookie: { maxAge: 60 * 60 * 1000 },
+    resave: false,
+    saveUninitialized: false,
   })
 );
 
@@ -49,12 +49,11 @@ http: app.use("/public", express.static("public"));
 
 // let XXX = require("程式路徑")
 // app.use("你想設的路徑(查json用)", XXX)
+let sessionRouter = require("./routers/loginRegister/session.js");
+app.use("/api/session", sessionRouter);
 
 let authRouter = require("./routers/loginRegister/auth.js");
 app.use("/api/auth", authRouter);
-
-let sessionRouter = require("./routers/loginRegister/session.js");
-app.use("/api/session", sessionRouter);
 
 let memberRouter = require("./routers/memberCenter/memSelf.js");
 app.use("/api/member", memberRouter);
@@ -100,9 +99,9 @@ app.use((err, req, res, next) => {
 });
 
 // 避免server crash
-process.on("uncaughtException", function (err) {
-  console.log(err);
-});
+// process.on("uncaughtException", function (err) {
+//   console.log(err);
+// });
 
 // --------------聆聽(port:3001)----------------
 app.listen(3001, () => {
