@@ -44,19 +44,17 @@ router.post("/", async (req, res) => {
 router.post("/order", async (req, res) => {
   console.log("req.body", req.body);
   let result = await connection.queryAsync(
-    "INSERT INTO booking (booking_id,room,status,name,phone,email,startTime,endTime,order_date,valid) VALUES (?)",
+    "INSERT INTO booking (booking_id,room,name,phone,email,startTime,endTime,order_date) VALUES (?)",
     [
       [
         req.body.booking_id,
         req.body.room,
-        req.body.status,
         req.body.name,
         req.body.phone,
         req.body.email,
         req.body.startTime,
         req.body.endTime,
         moment().format("YYYY-MM-DD"),
-        req.body.valid,
       ],
     ]
   );
