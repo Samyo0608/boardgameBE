@@ -121,7 +121,7 @@ router.get("/title/:discuss_id", async (req, res) => {
 });
 
 // 取得每人發文數量
-router.get("/discussCount", async (req, res) => {
+router.get("/discussCountNum", async (req, res) => {
   let data = await connection.queryAsync(
     "SELECT user_id,COUNT(*) as cot FROM discuss_content WHERE floor=0 GROUP BY user_id"
   );
