@@ -81,6 +81,10 @@ app.use("/api/booking", bookingRouter);
 let productRouter = require("./routers/product/product.js");
 app.use("/api/productlist", productRouter);
 
+// 客服
+let cutomerRouter = require("./routers/cutomerService/cutomerService.js");
+app.use("/api/cutomerService", cutomerRouter);
+
 // 產品頁面路由(測試)
 let cartRouter = require("./routers/cart/cart.js");
 app.use("/api/cart", cartRouter);
