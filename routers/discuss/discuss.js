@@ -21,6 +21,25 @@ router.get("/discussCount", async (req, res) => {
   res.json(data);
 });
 
+// 取得分類 reply熱門推薦用
+router.get("/getType/:discuss_id", async (req, res) => {
+  let data = await connection.queryAsync(
+    "SELECT type FROM discuss WHERE id=?",
+    [req.params.discuss_id]
+  );
+  console.log(data);
+  res.json(data[0].type);
+});
+
+// 列表：全部資料(照回覆數) reply熱門推薦用
+router.get("/replyHot/:discuss_id", async (req, res) => {
+  let data = await connection.queryAsync(
+    "SELECT A.id,A.type,A.title,A.user_id as i_user_id,B.user_id,temp.created_at,temp.cot,C.account as i_user_name,D.account as user_name FROM discuss as A JOIN (SELECT MAX(created_at) as created_at,discuss_id,COUNT(*) as cot FROM discuss_content GROUP BY discuss_id) as temp  ON A.id=temp.discuss_id JOIN discuss_content as B on B.created_at=temp.created_at JOIN member as C ON C.id=A.user_id JOIN member as D ON D.id=B.user_id WHERE A.type=? ORDER BY temp.cot DESC",
+    [req.params.discuss_id]
+  );
+  res.json(data);
+});
+
 // 列表：討論區首頁撈文章內容
 router.get("/indexContent", async (req, res) => {
   let data = await connection.queryAsync(
@@ -258,16 +277,20 @@ router.post("/addNewDiscussContent", async (req, res) => {
   res.json({ code: "0", message: "已建立" });
 });
 
-// 搜尋討論區
-// 列表：全部資料
+// 搜尋討論區-全部by最新回覆
 router.post("/searchDiscuss", async (req, res) => {
   let data = await connection.queryAsync(
-    "SELECT A.id,A.type,A.title,A.user_id as i_user_id,B.user_id,temp.created_at,temp.cot,C.account as i_user_name,D.account as user_name FROM discuss as A JOIN (SELECT MAX(created_at) as created_at,discuss_id,COUNT(*) as cot FROM discuss_content GROUP BY discuss_id) as temp  ON A.id=temp.discuss_id JOIN discuss_content as B on B.created_at=temp.created_at JOIN member as C ON C.id=A.user_id JOIN member as D ON D.id=B.user_id WHERE A.title LIKE ? or A.user_id LIKE ? or B.user_id LIKE ? ORDER BY temp.created_at DESC",
-    [
-      "%" + req.body.keyword + "%",
-      "%" + req.body.keyword + "%",
-      "%" + req.body.keyword + "%",
-    ]
+    "SELECT A.id,A.type,A.title,A.user_id as i_user_id,B.user_id,temp.created_at,temp.cot,C.account as i_user_name,D.account as user_name FROM discuss as A JOIN (SELECT MAX(created_at) as created_at,discuss_id,COUNT(*) as cot FROM discuss_content GROUP BY discuss_id) as temp  ON A.id=temp.discuss_id JOIN discuss_content as B on B.created_at=temp.created_at JOIN member as C ON C.id=A.user_id JOIN member as D ON D.id=B.user_id WHERE A.title LIKE ? or C.account LIKE ? ORDER BY temp.created_at DESC",
+    ["%" + req.body.keyword + "%", "%" + req.body.keyword + "%"]
+  );
+  res.json(data);
+});
+
+// 搜尋討論區-全部by最多回覆
+router.post("/searchMost", async (req, res) => {
+  let data = await connection.queryAsync(
+    "SELECT A.id,A.type,A.title,A.user_id as i_user_id,B.user_id,temp.created_at,temp.cot,C.account as i_user_name,D.account as user_name FROM discuss as A JOIN (SELECT MAX(created_at) as created_at,discuss_id,COUNT(*) as cot FROM discuss_content GROUP BY discuss_id) as temp  ON A.id=temp.discuss_id JOIN discuss_content as B on B.created_at=temp.created_at JOIN member as C ON C.id=A.user_id JOIN member as D ON D.id=B.user_id WHERE A.title LIKE ? or C.account LIKE ? ORDER BY temp.cot DESC",
+    ["%" + req.body.keyword + "%", "%" + req.body.keyword + "%"]
   );
   res.json(data);
 });
