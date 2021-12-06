@@ -60,4 +60,13 @@ router.post("/order/:account", async (req, res) => {
   res.json({ code: "602", message: "訂單成功建立" });
 });
 
+// 取得產品資料(navbar)
+router.post("/nav", async (req, res) => {
+  let product = await connection.queryAsync(
+    "SELECT product_id FROM product WHERE product_name = ?",
+    [req.body.search]
+  );
+  res.json(product);
+});
+
 module.exports = router;
