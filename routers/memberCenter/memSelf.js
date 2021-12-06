@@ -167,9 +167,10 @@ router.post("/rePassword/:account", passwordRules, async (req, res) => {
   }
 });
 
+// 產品訂購資料
 router.get("/productOrder/:account", async (req, res) => {
   let productOrder = await connection.queryAsync(
-    "SELECT * FROM product_order WHERE user_account = ?",
+    "SELECT * FROM product_order WHERE user_account = ? order by created_time",
     [req.session.member.account]
   );
 
