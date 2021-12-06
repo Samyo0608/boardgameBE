@@ -15,11 +15,15 @@ router.get("/", async (req, res) => {
 
 // 取得會員資料(check)
 router.get("/:account", async (req, res) => {
-  let member = await connection.queryAsync(
-    "SELECT id,account, name, email, phone ,address, point FROM member WHERE account = ?",
-    [req.session.member.account]
-  );
-  res.json(member);
+  if (req.session.member) {
+    let member = await connection.queryAsync(
+      "SELECT id,account, name, email, phone ,address, point FROM member WHERE account = ?",
+      [req.session.member.account]
+    );
+    res.json(member);
+  } else {
+    res.json({ message: "上未登入" });
+  }
 });
 
 // 點數寫入會員資料
