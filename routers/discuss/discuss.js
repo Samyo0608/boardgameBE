@@ -78,7 +78,7 @@ router.post("/deleteReply", async (req, res) => {
 // 列表：會員收藏資料
 router.post("/memberDiscuss", async (req, res) => {
   let data = await connection.queryAsync(
-    "SELECT A.id,A.type,A.title,A.user_id as i_user_id,B.user_id,temp.created_at,temp.cot FROM discuss as A JOIN (SELECT MAX(created_at) as created_at,discuss_id,COUNT(*) as cot FROM discuss_content GROUP BY discuss_id) as temp  ON A.id=temp.discuss_id JOIN discuss_content as B on B.created_at=temp.created_at JOIN discuss_keep as C on C.discuss_id=A.id WHERE C.user_id=? ORDER BY temp.created_at DESC",
+    "SELECT A.id,A.type,A.title,A.user_id as i_user_id,B.user_id,temp.created_at,temp.cot,D.account as account FROM discuss as A JOIN (SELECT MAX(created_at) as created_at,discuss_id,COUNT(*) as cot FROM discuss_content GROUP BY discuss_id) as temp  ON A.id=temp.discuss_id JOIN discuss_content as B on B.created_at=temp.created_at JOIN discuss_keep as C on C.discuss_id=A.id JOIN member as D on A.user_id=D.id WHERE C.user_id=? ORDER BY temp.created_at DESC",
     [req.body.id]
   );
   res.json(data);
